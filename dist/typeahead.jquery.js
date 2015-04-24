@@ -209,7 +209,9 @@
         _.mixin(EventBus.prototype, {
             trigger: function(type) {
                 var args = [].slice.call(arguments, 1);
-                this.$el.trigger(namespace + type, args);
+                var event = jQuery.Event(namespace + type);
+                this.$el.trigger(event, args);
+                return event;
             }
         });
         return EventBus;
@@ -1011,6 +1013,10 @@
                 }
             },
             _select: function select(datum) {
+                var eventResult = this.eventBus.trigger("selecting", datum.raw, datum.datasetName);
+                if (eventResult.isDefaultPrevented()) {
+                    return;
+                }
                 this.input.setQuery(datum.value);
                 this.input.setInputValue(datum.value, true);
                 this._setLanguageDirection();
